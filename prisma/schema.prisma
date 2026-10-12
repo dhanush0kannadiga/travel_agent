@@ -1,0 +1,14 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+model User { id String @id @default(cuid()); createdAt DateTime @default(now()); trips Trip[]; memories Memory[]; preferences TravelPreference[]; approvals Approval[] }
+model Trip { id String @id @default(cuid()); userId String; title String; goal Json; itinerary Json?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; user User @relation(fields:[userId], references:[id]); runs AgentRun[]; actions Action[] }
+model TravelPreference { id String @id @default(cuid()); userId String; key String; value Json; explicit Boolean @default(true); createdAt DateTime @default(now()); user User @relation(fields:[userId], references:[id]) }
+model Memory { id String @id @default(cuid()); userId String; type String; content String; metadata Json?; createdAt DateTime @default(now()); user User @relation(fields:[userId], references:[id]) }
+model AgentRun { id String @id @default(cuid()); tripId String; status String; state Json; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; trip Trip @relation(fields:[tripId], references:[id]); tasks AgentTask[]; toolCalls ToolCall[]; observations Observation[]; revisions PlanRevision[] }
+model AgentTask { id String @id @default(cuid()); runId String; taskId String; description String; status String; run AgentRun @relation(fields:[runId], references:[id]) }
+model ToolCall { id String @id @default(cuid()); runId String; tool String; input Json; output Json?; status String; createdAt DateTime @default(now()); run AgentRun @relation(fields:[runId], references:[id]) }
+model Observation { id String @id @default(cuid()); runId String; tool String; data Json; createdAt DateTime @default(now()); run AgentRun @relation(fields:[runId], references:[id]) }
+model PlanRevision { id String @id @default(cuid()); runId String; reason String; previousPlan Json; newPlan Json; createdAt DateTime @default(now()); run AgentRun @relation(fields:[runId], references:[id]) }
+model Action { id String @id @default(cuid()); tripId String; type String; risk String; status String; payload Json; createdAt DateTime @default(now()); trip Trip @relation(fields:[tripId], references:[id]); approval Approval? }
+model Approval { id String @id @default(cuid()); actionId String @unique; userId String; status String; approvedAt DateTime?; createdAt DateTime @default(now()); action Action @relation(fields:[actionId], references:[id]); user User @relation(fields:[userId], references:[id]) }

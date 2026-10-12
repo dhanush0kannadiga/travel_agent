@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server';
+import { runDemoAgent } from '@/agent/orchestrator';
+export async function POST(req:Request){const body=await req.json(); const text=String(body.request||''); const goal={origin:text.toLowerCase().includes('bengaluru')?'Bengaluru':undefined,destination:text.toLowerCase().includes('japan')?'Japan':undefined,duration_days:Number(text.match(/(\d+)\s*[- ]?day/)?.[1]||8),budget:{amount:Number(text.match(/₹\s*([\d,]+)/)?.[1]?.replace(/,/g,'')||150000),currency:'INR'},travellers:1,interests:['nature','photography'],preferences:{quiet_places:true}}; return NextResponse.json(await runDemoAgent(goal));}
